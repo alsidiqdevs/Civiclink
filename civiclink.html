@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CivicLink — Sierra Leone Citizen Intelligence Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#0D1117;
+  --ink2:#1C2434;
+  --surface:#F5F7FA;
+  --card:#FFFFFF;
+  --border:#E4E9F0;
+  --muted:#7A8699;
+  --green:#1A6B3C;
+  --green2:#23924F;
+  --green-tint:#E8F5EE;
+  --gold:#D4860A;
+  --gold-tint:#FEF3DC;
+  --red:#C0392B;
+  --red-tint:#FDECEB;
+  --blue:#1A5CA8;
+  --blue-tint:#EBF2FC;
+  --orange:#C05621;
+  --orange-tint:#FEF0E8;
+  --purple:#5B21B6;
+  --purple-tint:#F0EBFF;
+  --signal:#00C853;
+  --r:10px;
+  --r2:16px;
+  --sh:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.06);
+  --sh2:0 2px 8px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.10);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);overflow:hidden;}
+
+/* ── LAYOUT SHELL ── */
+.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;background:var(--surface);position:relative;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.12);}
+
+/* ── MODE TOGGLE (Citizen / Gov) ── */
+.mode-bar{display:flex;background:var(--ink);padding:10px 14px;gap:6px;align-items:center;flex-shrink:0;}
+.mode-flag{display:flex;flex-direction:column;width:22px;height:15px;border-radius:2px;overflow:hidden;flex-shrink:0;}
+.mf-g{background:#1EB53A;flex:1;}
+.mf-w{background:#FFF;flex:1;}
+.mf-b{background:#0072C6;flex:1;}
+.mode-brand{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#FFF;letter-spacing:-.3px;margin-right:auto;margin-left:8px;}
+.mode-brand span{color:#D4860A;}
+.mode-switch{display:flex;background:rgba(255,255,255,.10);border-radius:20px;padding:3px;gap:2px;}
+.mode-btn{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;letter-spacing:.4px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.55);text-transform:uppercase;transition:all .2s;}
+.mode-btn.active{background:var(--gold);color:#FFF;}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--ink2);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.tb-left{display:flex;flex-direction:column;}
+.tb-greeting{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;}
+.tb-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#FFF;}
+.tb-right{display:flex;gap:8px;align-items:center;}
+.icon-btn{background:rgba(255,255,255,.08);border:none;border-radius:8px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;position:relative;transition:background .15s;}
+.icon-btn:hover{background:rgba(255,255,255,.15);}
+.badge-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--gold);border-radius:50%;border:1.5px solid var(--ink2);}
+.avatar-sm{width:34px;height:34px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;}
+
+/* ── LIVE STATUS TICKER ── */
+.live-bar{background:var(--green);padding:7px 16px;display:flex;align-items:center;gap:8px;font-size:11px;color:#FFF;flex-shrink:0;}
+.live-pip{width:7px;height:7px;background:#FFF;border-radius:50%;animation:pip 1.4s infinite;}
+@keyframes pip{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.7);}}
+.live-text{flex:1;}
+.live-text b{font-weight:700;}
+.live-count{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(0,0,0,.2);padding:2px 8px;border-radius:10px;}
+
+/* ── SCROLLABLE CONTENT ── */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ── HOME SCREEN ── */
+.hero{background:linear-gradient(160deg,var(--ink2) 0%,#0F3A22 100%);padding:20px 16px 22px;}
+.hero-kicker{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.hero-h{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:#FFF;line-height:1.25;margin-bottom:14px;}
+.hero-h em{color:var(--gold);font-style:normal;}
+.pulse-ring{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;font-size:12px;color:rgba(255,255,255,.8);}
+.pulse-ring b{color:var(--gold);}
+
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px 0;}
+.metric{background:var(--card);border-radius:var(--r);padding:12px 10px;text-align:center;box-shadow:var(--sh);}
+.metric-num{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;line-height:1;color:var(--green);}
+.metric.crit .metric-num{color:var(--red);}
+.metric.pend .metric-num{color:var(--gold);}
+.metric-lbl{font-size:10px;color:var(--muted);margin-top:3px;font-weight:500;}
+
+.sec-row{padding:16px 16px 8px;display:flex;align-items:center;justify-content:space-between;}
+.sec-h{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;letter-spacing:.2px;color:var(--ink);}
+.sec-link{font-size:12px;color:var(--green);font-weight:600;cursor:pointer;}
+
+/* Category chips */
+.cat-scroll{display:flex;gap:8px;padding:0 16px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.cat-chip{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer;}
+.cat-chip-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .15s;}
+.cat-chip:active .cat-chip-icon{transform:scale(.93);}
+.cat-chip-lbl{font-size:10px;font-weight:600;color:var(--ink);text-align:center;width:58px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* Report Cards */
+.report-stack{padding:0 16px;display:flex;flex-direction:column;gap:8px;}
+.rcard{background:var(--card);border-radius:var(--r2);box-shadow:var(--sh);overflow:hidden;cursor:pointer;transition:transform .15s;}
+.rcard:active{transform:scale(.98);}
+.rcard-accent{height:3px;}
+.rcard-body{padding:12px 14px;}
+.rcard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.rcard-cat{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.rcard-title{font-size:14px;font-weight:600;color:var(--ink);line-height:1.35;}
+.pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;white-space:nowrap;flex-shrink:0;}
+.pill-crit{background:var(--red-tint);color:var(--red);}
+.pill-high{background:var(--orange-tint);color:var(--orange);}
+.pill-med{background:var(--gold-tint);color:var(--gold);}
+.pill-res{background:var(--green-tint);color:var(--green);}
+.pill-sent{background:var(--blue-tint);color:var(--blue);}
+.rcard-meta{display:flex;gap:12px;font-size:11px;color:var(--muted);}
+.rcard-dept{margin-top:6px;padding-top:6px;border-top:1px solid var(--border);display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.dept-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+
+/* AI triage tag */
+.ai-tag{display:inline-flex;align-items:center;gap:4px;background:var(--purple-tint);color:var(--purple);font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:4px;}
+
+/* ── REPORT SCREEN ── */
+.rform{padding:16px;}
+.rform-h{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--green);margin-bottom:2px;}
+.rform-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.fl{margin-bottom:14px;}
+.fl label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--ink);margin-bottom:5px;text-transform:uppercase;}
+.fi,.fs,.ft{width:100%;border:1.5px solid var(--border);border-radius:var(--r);padding:11px 13px;font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);background:var(--card);outline:none;transition:border-color .15s;}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--green);}
+.ft{resize:none;height:80px;}
+.fs{appearance:none;}
+
+.cat-grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cat-btn{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink);text-align:left;transition:all .15s;}
+.cat-btn .ci{font-size:18px;}
+.cat-btn.sel{border-color:var(--green);background:var(--green-tint);color:var(--green);font-weight:700;}
+
+.sev-row{display:flex;gap:6px;}
+.sev-btn{flex:1;border:1.5px solid var(--border);border-radius:var(--r);padding:9px 6px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;background:var(--card);transition:all .15s;}
+.sev-btn.low.sel{background:var(--green-tint);border-color:var(--green);color:var(--green);}
+.sev-btn.med.sel{background:var(--gold-tint);border-color:var(--gold);color:var(--gold);}
+.sev-btn.high.sel{background:var(--orange-tint);border-color:var(--orange);color:var(--orange);}
+.sev-btn.crit.sel{background:var(--red-tint);border-color:var(--red);color:var(--red);}
+
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;color:var(--muted);cursor:pointer;background:var(--card);font-size:13px;transition:border-color .15s;}
+.upload-zone:hover{border-color:var(--green);}
+.upload-zone .uz-icon{font-size:28px;margin-bottom:6px;}
+
+.route-box{background:var(--blue-tint);border:1.5px solid #BEE3F8;border-radius:var(--r);padding:12px 14px;margin-bottom:14px;}
+.route-lbl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.route-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;color:var(--ink);border-bottom:1px solid rgba(0,0,0,.05);}
+.route-item:last-child{border:none;padding-bottom:0;}
+.ri-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+
+.submit-btn{width:100%;background:var(--green);color:#FFF;border:none;border-radius:12px;padding:15px;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.2px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.submit-btn:active{transform:scale(.98);background:var(--green2);}
+
+/* anon toggle */
+.anon-row{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;}
+.anon-info{font-size:13px;font-weight:600;color:var(--ink);}
+.anon-sub{font-size:11px;color:var(--muted);}
+.toggle{width:42px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#FFF;border-radius:50%;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.toggle.on::after{left:21px;}
+
+/* ── TRACKER SCREEN ── */
+.tracker-wrap{padding:16px;}
+.track-card{background:var(--card);border-radius:var(--r2);box-shadow:var(--sh);margin-bottom:12px;overflow:hidden;}
+.tc-head{padding:14px 14px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+.tc-title{font-size:15px;font-weight:700;color:var(--ink);}
+.tc-id{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.progress-bar{display:flex;align-items:center;padding:14px 14px 0;gap:0;}
+.pb-step{flex:1;text-align:center;position:relative;}
+.pb-step::before{content:'';position:absolute;top:10px;left:-50%;right:50%;height:2px;background:var(--border);z-index:0;}
+.pb-step:first-child::before{display:none;}
+.pb-step.done::before,.pb-step.active::before{background:var(--green);}
+.pb-dot{width:20px;height:20px;border-radius:50%;background:var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);position:relative;z-index:1;transition:all .2s;}
+.pb-step.done .pb-dot{background:var(--green);color:#FFF;}
+.pb-step.active .pb-dot{background:var(--gold);color:#FFF;box-shadow:0 0 0 3px var(--gold-tint);}
+.pb-lbl{font-size:9px;color:var(--muted);margin-top:3px;font-weight:600;}
+.pb-step.done .pb-lbl{color:var(--green);}
+.pb-step.active .pb-lbl{color:var(--gold);}
+.tc-response{margin:12px 14px 14px;background:var(--surface);border-radius:8px;padding:10px 12px;display:flex;gap:8px;font-size:12px;}
+.tcr-icon{font-size:18px;flex-shrink:0;}
+.tcr-dept{font-size:11px;font-weight:700;color:var(--green);margin-bottom:2px;}
+.tc-rating{padding:0 14px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.stars{display:flex;gap:2px;}
+.star{font-size:16px;cursor:pointer;}
+
+/* ── FEED / MAP SCREEN ── */
+.feed-wrap{padding:0 16px 16px;}
+.feed-tabs{display:flex;gap:6px;padding:12px 0 10px;overflow-x:auto;scrollbar-width:none;}
+.feed-tabs::-webkit-scrollbar{display:none;}
+.ftab{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;}
+.ftab.active{background:var(--green);color:#FFF;border-color:var(--green);}
+
+/* Fake map */
+.map-box{background:linear-gradient(145deg,#e8f0e8 0%,#d4e8d4 50%,#c8dfc8 100%);border-radius:var(--r2);overflow:hidden;height:180px;position:relative;margin-bottom:12px;border:1.5px solid var(--border);}
+.map-grid{position:absolute;inset:0;opacity:.15;background-image:linear-gradient(var(--green) 1px,transparent 1px),linear-gradient(90deg,var(--green) 1px,transparent 1px);background-size:30px 30px;}
+.map-road-h{position:absolute;top:50%;left:0;right:0;height:3px;background:rgba(255,255,255,.7);transform:translateY(-50%);}
+.map-road-v{position:absolute;left:35%;top:0;bottom:0;width:3px;background:rgba(255,255,255,.7);}
+.map-road-v2{position:absolute;left:70%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.5);}
+.map-label{position:absolute;top:8px;left:10px;font-size:10px;font-weight:700;color:var(--green);letter-spacing:.5px;background:rgba(255,255,255,.8);padding:2px 8px;border-radius:8px;}
+.map-legend{position:absolute;bottom:8px;right:8px;display:flex;flex-direction:column;gap:3px;}
+.map-leg-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--ink);background:rgba(255,255,255,.85);padding:2px 6px;border-radius:5px;}
+.map-leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* Map pins */
+.mpin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;}
+.mpin-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;border:2px solid #FFF;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:mpin-in .3s ease-out;}
+@keyframes mpin-in{from{transform:scale(0);}to{transform:scale(1);}}
+.mpin-crit .mpin-dot{background:var(--red);}
+.mpin-high .mpin-dot{background:var(--orange);}
+.mpin-res .mpin-dot{background:var(--green);}
+
+/* ── ALERTS SCREEN ── */
+.alerts-wrap{padding:16px;}
+.alert-card{border-radius:var(--r2);padding:14px;margin-bottom:10px;border-left:4px solid;}
+.alert-card.emergency{background:var(--red-tint);border-color:var(--red);}
+.alert-card.warning{background:var(--gold-tint);border-color:var(--gold);}
+.alert-card.info{background:var(--blue-tint);border-color:var(--blue);}
+.alert-card.resolved{background:var(--green-tint);border-color:var(--green);}
+.alert-type{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px;}
+.alert-card.emergency .alert-type{color:var(--red);}
+.alert-card.warning .alert-type{color:var(--gold);}
+.alert-card.info .alert-type{color:var(--blue);}
+.alert-card.resolved .alert-type{color:var(--green);}
+.alert-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.alert-body{font-size:12px;color:var(--ink);line-height:1.5;margin-bottom:8px;}
+.alert-meta{font-size:11px;color:var(--muted);}
+.alert-action{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;border:none;}
+.emergency .alert-action{background:var(--red);color:#FFF;}
+.warning .alert-action{background:var(--gold);color:#FFF;}
+.info .alert-action{background:var(--blue);color:#FFF;}
+
+/* ── GOV DASHBOARD ── */
+.gov-wrap{padding:16px;}
+.gov-hero{background:linear-gradient(135deg,var(--ink2),#0F2A50);border-radius:var(--r2);padding:18px;margin-bottom:14px;}
+.gov-hero-h{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#FFF;margin-bottom:12px;}
+.gov-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.gs{background:rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;}
+.gs-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:#FFF;}
+.gs-lbl{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;}
+.gs.alert-stat .gs-num{color:var(--gold);}
+.gs.crit-stat .gs-num{color:#FF6B6B;}
+
+.incident-queue{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.iq-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:12px 14px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;border-left:3px solid var(--border);transition:border-color .15s;}
+.iq-card.p-crit{border-left-color:var(--red);}
+.iq-card.p-high{border-left-color:var(--orange);}
+.iq-card.p-med{border-left-color:var(--gold);}
+.iq-score{background:var(--surface);border-radius:8px;padding:6px 8px;text-align:center;flex-shrink:0;min-width:44px;}
+.iq-score-num{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--ink);line-height:1;}
+.iq-score-lbl{font-size:8px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
+.iq-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.iq-meta{font-size:11px;color:var(--muted);}
+.iq-assign{margin-top:6px;}
+.assign-btn{font-size:11px;font-weight:700;background:var(--green);color:#FFF;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;}
+.assign-btn:hover{background:var(--green2);}
+
+/* Agency scorecard */
+.scorecard{background:var(--card);border-radius:var(--r2);box-shadow:var(--sh);padding:14px;margin-bottom:14px;}
+.sc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.sc-h{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--ink);}
+.sc-period{font-size:11px;color:var(--muted);}
+.sc-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.sc-row:last-child{border:none;}
+.sc-rank{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);width:20px;flex-shrink:0;}
+.sc-agency{flex:1;font-size:12px;font-weight:600;color:var(--ink);}
+.sc-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:3px;flex-shrink:0;}
+.sc-bar{height:100%;border-radius:3px;background:var(--green);}
+.sc-pct{font-size:11px;font-weight:700;color:var(--green);width:32px;text-align:right;flex-shrink:0;}
+.sc-bar.warn{background:var(--gold);}
+.sc-pct.warn{color:var(--gold);}
+.sc-bar.poor{background:var(--red);}
+.sc-pct.poor{color:var(--red);}
+
+/* AI Module panel */
+.ai-panel{background:var(--purple-tint);border:1.5px solid #DDD6FE;border-radius:var(--r2);padding:14px;margin-bottom:14px;}
+.ai-panel-h{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ai-insight{display:flex;gap:10px;margin-bottom:8px;font-size:12px;color:var(--ink);align-items:flex-start;}
+.ai-insight:last-child{margin-bottom:0;}
+.ai-icon{font-size:18px;flex-shrink:0;}
+.ai-insight b{font-weight:700;color:var(--purple);}
+
+/* ── PROFILE SCREEN ── */
+.profile-wrap{padding:16px;}
+.profile-hero-card{background:linear-gradient(135deg,var(--green),var(--green2));border-radius:var(--r2);padding:22px 18px;text-align:center;margin-bottom:14px;}
+.ph-av{width:62px;height:62px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--ink);margin:0 auto 10px;}
+.ph-name{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#FFF;}
+.ph-loc{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;}
+.ph-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.ph-chip{background:rgba(255,255,255,.15);border-radius:12px;padding:4px 10px;font-size:11px;font-weight:700;color:#FFF;}
+.impact-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.impact-cell{background:var(--card);border-radius:var(--r);padding:12px 8px;text-align:center;box-shadow:var(--sh);}
+.ic-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--green);}
+.ic-lbl{font-size:9px;color:var(--muted);font-weight:600;margin-top:2px;}
+.menu-list{display:flex;flex-direction:column;gap:6px;}
+.menu-item{background:var(--card);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--sh);font-size:13px;font-weight:600;}
+.mi-icon{font-size:20px;width:28px;text-align:center;}
+.mi-arr{margin-left:auto;color:var(--muted);}
+.lang-badge{margin-left:auto;font-size:11px;font-weight:700;color:var(--green);background:var(--green-tint);padding:3px 8px;border-radius:8px;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0 10px;flex-shrink:0;z-index:100;}
+.bnav{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--muted);padding:4px 0;transition:color .15s;}
+.bnav.active{color:var(--green);}
+.bnav-icon{font-size:22px;line-height:1;}
+.bnav-lbl{font-size:10px;font-weight:700;}
+.bnav-report{background:var(--green);color:#FFF!important;border-radius:14px;margin-top:-14px;padding:12px 8px 4px;box-shadow:0 4px 16px rgba(26,107,60,.4);}
+.bnav-report:hover{background:var(--green2);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--ink);color:#FFF;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;white-space:nowrap;box-shadow:var(--sh2);opacity:0;transition:all .3s;z-index:1000;display:flex;align-items:center;gap:8px;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── SMS/USSD PANEL ── */
+.ussd-bar{background:var(--gold-tint);border-top:1px solid #F6D860;padding:8px 16px;font-size:11px;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+
+/* Utility */
+.mt8{margin-top:8px;}
+.pb16{padding-bottom:16px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- MODE BAR -->
+  <div class="mode-bar">
+    <div class="mode-flag"><div class="mf-g"></div><div class="mf-w"></div><div class="mf-b"></div></div>
+    <div class="mode-brand">Civic<span>Link</span></div>
+    <div class="mode-switch">
+      <button class="mode-btn active" id="mode-citizen" onclick="setMode('citizen')">Citizen</button>
+      <button class="mode-btn" id="mode-gov" onclick="setMode('gov')">Gov Dashboard</button>
+    </div>
+  </div>
+
+  <!-- TOPBAR (dynamic) -->
+  <div class="topbar" id="topbar">
+    <div class="tb-left">
+      <div class="tb-greeting">Good morning, Aminata</div>
+      <div class="tb-title">Western Area · Freetown</div>
+    </div>
+    <div class="tb-right">
+      <button class="icon-btn" onclick="switchScreen('alerts')">🔔<div class="badge-dot"></div></button>
+      <div class="avatar-sm" onclick="switchScreen('profile')">AK</div>
+    </div>
+  </div>
+
+  <!-- LIVE BAR -->
+  <div class="live-bar">
+    <div class="live-pip"></div>
+    <div class="live-text">Live · <b>47 active reports</b> across Sierra Leone</div>
+    <div class="live-count">🟢 12 Resolved today</div>
+  </div>
+
+  <!-- USSD/SMS BAR -->
+  <div class="ussd-bar">📱 No smartphone? Report via SMS: <b>text REPORT to 717</b> · USSD: <b>*717#</b></div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══ HOME SCREEN ═══ -->
+    <div class="screen active" id="screen-home">
+      <div class="hero">
+        <div class="hero-kicker">Sierra Leone · Citizen Intelligence Network</div>
+        <div class="hero-h">Your eyes become<br><em>government intelligence.</em></div>
+        <div class="pulse-ring"><div class="live-pip"></div> <b>47</b> active issues · <b>8</b> agencies responding</div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric crit"><div class="metric-num">7</div><div class="metric-lbl">Critical Now</div></div>
+        <div class="metric pend"><div class="metric-num">34</div><div class="metric-lbl">In Progress</div></div>
+        <div class="metric"><div class="metric-num">89</div><div class="metric-lbl">Resolved</div></div>
+      </div>
+
+      <div class="sec-row"><div class="sec-h">Report an Issue</div><div class="sec-link" onclick="switchScreen('report')">+ New</div></div>
+
+      <div class="cat-scroll">
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#FEE2E2;">🛣️</div><div class="cat-chip-lbl">Roads</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#FFF3CD;">⚡</div><div class="cat-chip-lbl">Electricity</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#DBEAFE;">🌊</div><div class="cat-chip-lbl">Flooding</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#FFEDD5;">🔥</div><div class="cat-chip-lbl">Fire</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#EDE9FE;">🏚️</div><div class="cat-chip-lbl">Buildings</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#DCFCE7;">🌳</div><div class="cat-chip-lbl">Environment</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#FCE7F3;">🏥</div><div class="cat-chip-lbl">Health</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#F3F4F6;">🚨</div><div class="cat-chip-lbl">Security</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#FEF9C3;">💧</div><div class="cat-chip-lbl">Water</div>
+        </div>
+        <div class="cat-chip" onclick="switchScreen('report')">
+          <div class="cat-chip-icon" style="background:#FEE2E2;">🏫</div><div class="cat-chip-lbl">Schools</div>
+        </div>
+      </div>
+
+      <div class="sec-row"><div class="sec-h">Live Issues Near You</div><div class="sec-link" onclick="switchScreen('feed')">View Map</div></div>
+
+      <div class="report-stack">
+        <div class="rcard" onclick="switchScreen('tracker')">
+          <div class="rcard-accent" style="background:var(--red);"></div>
+          <div class="rcard-body">
+            <div class="rcard-top">
+              <div>
+                <div class="rcard-cat">🛣️ Road Damage</div>
+                <div class="rcard-title">Collapsed bridge blocking Kissy Road, East Freetown</div>
+                <div class="ai-tag">🤖 AI: Critical · Risk to life</div>
+              </div>
+              <span class="pill pill-crit">Critical</span>
+            </div>
+            <div class="rcard-meta"><span>📍 East Freetown</span><span>🕐 2h ago</span><span>👁 23</span><span>⬆️ 18</span></div>
+            <div class="rcard-dept"><div class="dept-dot"></div>Routed → Ministry of Works · City Council Roads Unit</div>
+          </div>
+        </div>
+
+        <div class="rcard">
+          <div class="rcard-accent" style="background:var(--orange);"></div>
+          <div class="rcard-body">
+            <div class="rcard-top">
+              <div>
+                <div class="rcard-cat">⚡ Electricity</div>
+                <div class="rcard-title">Fallen live pole blocking hill junction, Murray Town</div>
+                <div class="ai-tag">🤖 AI: High priority · Electrocution risk</div>
+              </div>
+              <span class="pill pill-high">High</span>
+            </div>
+            <div class="rcard-meta"><span>📍 Murray Town</span><span>🕐 5h ago</span><span>👁 11</span></div>
+            <div class="rcard-dept"><div class="dept-dot"></div>Routed → EDSA · Ministry of Energy</div>
+          </div>
+        </div>
+
+        <div class="rcard">
+          <div class="rcard-accent" style="background:var(--green);"></div>
+          <div class="rcard-body">
+            <div class="rcard-top">
+              <div>
+                <div class="rcard-cat">🌊 Flooding Risk</div>
+                <div class="rcard-title">Blocked drainage causing flooding, Wellington St.</div>
+              </div>
+              <span class="pill pill-res">Resolved ✓</span>
+            </div>
+            <div class="rcard-meta"><span>📍 Wellington</span><span>🕐 1d ago</span><span>👁 41</span></div>
+            <div class="rcard-dept" style="border-color:var(--green-tint);"><div class="dept-dot"></div>City Council Drainage — cleared in 38 hours</div>
+          </div>
+        </div>
+
+        <div class="rcard">
+          <div class="rcard-accent" style="background:var(--gold);"></div>
+          <div class="rcard-body">
+            <div class="rcard-top">
+              <div>
+                <div class="rcard-cat">🌳 Environment</div>
+                <div class="rcard-title">Illegal logging in Waterloo Forest Reserve</div>
+                <div class="ai-tag">🤖 AI: Environmental crime detected</div>
+              </div>
+              <span class="pill pill-med">In Review</span>
+            </div>
+            <div class="rcard-meta"><span>📍 Waterloo</span><span>🕐 6h ago</span><span>👁 34</span></div>
+            <div class="rcard-dept"><div class="dept-dot"></div>Routed → EPA Sierra Leone · Forestry Division</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- ═══ REPORT SCREEN ═══ -->
+    <div class="screen" id="screen-report">
+      <div class="rform">
+        <div class="rform-h">Report an Issue</div>
+        <div class="rform-sub">Sent directly to the responsible ministry, agency & local council.</div>
+
+        <div class="fl">
+          <label>Category</label>
+          <div class="cat-grid2" id="catGrid">
+            <button class="cat-btn sel" onclick="pickCat(this,'road')"><span class="ci">🛣️</span> Road Damage</button>
+            <button class="cat-btn" onclick="pickCat(this,'electricity')"><span class="ci">⚡</span> Electricity</button>
+            <button class="cat-btn" onclick="pickCat(this,'flood')"><span class="ci">🌊</span> Flooding</button>
+            <button class="cat-btn" onclick="pickCat(this,'building')"><span class="ci">🏚️</span> Buildings</button>
+            <button class="cat-btn" onclick="pickCat(this,'fire')"><span class="ci">🔥</span> Fire Hazard</button>
+            <button class="cat-btn" onclick="pickCat(this,'environment')"><span class="ci">🌳</span> Environment</button>
+            <button class="cat-btn" onclick="pickCat(this,'health')"><span class="ci">🏥</span> Health</button>
+            <button class="cat-btn" onclick="pickCat(this,'security')"><span class="ci">🚨</span> Security</button>
+            <button class="cat-btn" onclick="pickCat(this,'water')"><span class="ci">💧</span> Water Supply</button>
+            <button class="cat-btn" onclick="pickCat(this,'corruption')"><span class="ci">⚖️</span> Corruption</button>
+          </div>
+        </div>
+
+        <div class="route-box" id="routeBox">
+          <div class="route-lbl">📡 Auto-routing to</div>
+          <div id="routeItems">
+            <div class="route-item"><div class="ri-dot"></div>Ministry of Works, Housing &amp; Infrastructure</div>
+            <div class="route-item"><div class="ri-dot"></div>Freetown City Council — Roads Unit</div>
+            <div class="route-item"><div class="ri-dot"></div>District Officer, Western Area</div>
+          </div>
+        </div>
+
+        <div class="fl">
+          <label>Title</label>
+          <input class="fi" type="text" placeholder="Brief summary — e.g. Collapsed bridge on Kissy Road">
+        </div>
+
+        <div class="fl">
+          <label>Description</label>
+          <textarea class="ft" placeholder="What do you see? The more detail, the faster the response..."></textarea>
+        </div>
+
+        <div class="fl">
+          <label>Location</label>
+          <input class="fi" type="text" placeholder="📍 Tap to use GPS or enter address">
+        </div>
+
+        <div class="fl">
+          <label>Urgency Level</label>
+          <div class="sev-row">
+            <div class="sev-btn low" onclick="pickSev(this)">🟢 Low</div>
+            <div class="sev-btn med sel" onclick="pickSev(this)">🟡 Medium</div>
+            <div class="sev-btn high" onclick="pickSev(this)">🟠 High</div>
+            <div class="sev-btn crit" onclick="pickSev(this)">🔴 Critical</div>
+          </div>
+        </div>
+
+        <div class="fl">
+          <label>Evidence</label>
+          <div class="upload-zone">
+            <div class="uz-icon">📷</div>
+            <div>Attach photo, video, or audio</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">JPG · MP4 · MP3 · Max 50MB</div>
+          </div>
+        </div>
+
+        <div class="anon-row">
+          <div>
+            <div class="anon-info">🔒 Submit Anonymously</div>
+            <div class="anon-sub">Your identity is hidden from all departments</div>
+          </div>
+          <div class="toggle" id="anonToggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+
+        <button class="submit-btn" onclick="submitReport()">📤 Submit Report to Government</button>
+        <div style="height:8px;"></div>
+        <div style="text-align:center;font-size:11px;color:var(--muted);">Your report gets a unique tracking ID · Full audit trail</div>
+      </div>
+    </div>
+
+    <!-- ═══ TRACKER SCREEN ═══ -->
+    <div class="screen" id="screen-tracker">
+      <div class="tracker-wrap">
+        <div class="sec-row" style="padding:4px 0 12px;"><div class="sec-h">My Reports</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);">3 active</div></div>
+
+        <!-- Track 1 -->
+        <div class="track-card">
+          <div class="tc-head">
+            <div><div class="tc-title">🛣️ Collapsed bridge — Kissy Road</div><div class="tc-id">#SC-2025-0482 · 2h ago</div></div>
+            <span class="pill pill-crit">Critical</span>
+          </div>
+          <div class="progress-bar">
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Sent</div></div>
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Received</div></div>
+            <div class="pb-step active"><div class="pb-dot">→</div><div class="pb-lbl">Assigned</div></div>
+            <div class="pb-step"><div class="pb-dot">4</div><div class="pb-lbl">Action</div></div>
+            <div class="pb-step"><div class="pb-dot">5</div><div class="pb-lbl">Resolved</div></div>
+          </div>
+          <div class="tc-response">
+            <div class="tcr-icon">🏛️</div>
+            <div><div class="tcr-dept">Ministry of Works — Roads Unit</div>Report received & assigned to Eng. Koroma. Field team dispatched to site.</div>
+          </div>
+        </div>
+
+        <!-- Track 2 -->
+        <div class="track-card">
+          <div class="tc-head">
+            <div><div class="tc-title">🌊 Blocked drainage — Wellington St.</div><div class="tc-id">#SC-2025-0461 · 3d ago</div></div>
+            <span class="pill pill-res">Resolved ✓</span>
+          </div>
+          <div class="progress-bar">
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Sent</div></div>
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Received</div></div>
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Assigned</div></div>
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Action</div></div>
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Resolved</div></div>
+          </div>
+          <div class="tc-response" style="background:var(--green-tint);">
+            <div class="tcr-icon">✅</div>
+            <div><div class="tcr-dept" style="color:var(--green);">FCC Drainage Unit · Resolved in 38hrs</div>Drainage cleared by maintenance crew. Issue resolved. Thank you for reporting.</div>
+          </div>
+          <div class="tc-rating">Rate the response:
+            <div class="stars">
+              <span class="star" onclick="rateStar(this)">⭐</span>
+              <span class="star" onclick="rateStar(this)">⭐</span>
+              <span class="star" onclick="rateStar(this)">⭐</span>
+              <span class="star" onclick="rateStar(this)">⭐</span>
+              <span class="star" onclick="rateStar(this)">☆</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track 3 -->
+        <div class="track-card">
+          <div class="tc-head">
+            <div><div class="tc-title">🌳 Illegal logging — Waterloo Reserve</div><div class="tc-id">#SC-2025-0440 · 6d ago</div></div>
+            <span class="pill pill-med">In Review</span>
+          </div>
+          <div class="progress-bar">
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Sent</div></div>
+            <div class="pb-step done"><div class="pb-dot">✓</div><div class="pb-lbl">Received</div></div>
+            <div class="pb-step active"><div class="pb-dot">→</div><div class="pb-lbl">Assigned</div></div>
+            <div class="pb-step"><div class="pb-dot">4</div><div class="pb-lbl">Action</div></div>
+            <div class="pb-step"><div class="pb-dot">5</div><div class="pb-lbl">Resolved</div></div>
+          </div>
+          <div class="tc-response">
+            <div class="tcr-icon">🌿</div>
+            <div><div class="tcr-dept">EPA Sierra Leone · Forestry Division</div>Under review. Environmental officer scheduled Friday. Escalation path: EPA → Ministry → National Dashboard.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FEED / MAP SCREEN ═══ -->
+    <div class="screen" id="screen-feed">
+      <div class="feed-wrap">
+        <div class="feed-tabs">
+          <div class="ftab active">All Issues</div>
+          <div class="ftab">Roads</div>
+          <div class="ftab">Electric</div>
+          <div class="ftab">Flooding</div>
+          <div class="ftab">Environment</div>
+          <div class="ftab">Resolved</div>
+        </div>
+
+        <!-- Fake live map -->
+        <div class="map-box">
+          <div class="map-grid"></div>
+          <div class="map-road-h"></div>
+          <div class="map-road-v"></div>
+          <div class="map-road-v2"></div>
+          <div class="map-label">📍 Western Area · Freetown</div>
+          <!-- Map pins -->
+          <div class="mpin mpin-crit" style="left:35%;top:45%;" title="Collapsed bridge"><div class="mpin-dot">🛣️</div></div>
+          <div class="mpin mpin-high" style="left:55%;top:30%;" title="Fallen pole"><div class="mpin-dot">⚡</div></div>
+          <div class="mpin mpin-high" style="left:72%;top:60%;" title="Fire risk"><div class="mpin-dot">🔥</div></div>
+          <div class="mpin mpin-res" style="left:25%;top:65%;" title="Resolved"><div class="mpin-dot">✓</div></div>
+          <div class="mpin mpin-high" style="left:80%;top:40%;" title="Building"><div class="mpin-dot">🏚️</div></div>
+          <div class="map-legend">
+            <div class="map-leg-item"><div class="map-leg-dot" style="background:var(--red);"></div>Critical</div>
+            <div class="map-leg-item"><div class="map-leg-dot" style="background:var(--orange);"></div>High</div>
+            <div class="map-leg-item"><div class="map-leg-dot" style="background:var(--green);"></div>Resolved</div>
+          </div>
+        </div>
+
+        <div class="report-stack" style="padding:0;">
+          <div class="rcard">
+            <div class="rcard-accent" style="background:var(--red);"></div>
+            <div class="rcard-body">
+              <div class="rcard-top"><div><div class="rcard-cat">🔥 Fire Hazard</div><div class="rcard-title">Warehouse fire risk — Congo Cross Market</div><div class="ai-tag">🤖 AI: Evacuate risk zone</div></div><span class="pill pill-crit">Critical</span></div>
+              <div class="rcard-meta"><span>📍 Congo Cross</span><span>🕐 45m ago</span><span>👁 67</span></div>
+            </div>
+          </div>
+          <div class="rcard">
+            <div class="rcard-accent" style="background:var(--red);"></div>
+            <div class="rcard-body">
+              <div class="rcard-top"><div><div class="rcard-cat">🛣️ Road Damage</div><div class="rcard-title">Collapsed bridge on Kissy Road, Freetown</div></div><span class="pill pill-crit">Critical</span></div>
+              <div class="rcard-meta"><span>📍 East Freetown</span><span>🕐 2h ago</span><span>👁 23</span></div>
+            </div>
+          </div>
+          <div class="rcard">
+            <div class="rcard-accent" style="background:var(--orange);"></div>
+            <div class="rcard-body">
+              <div class="rcard-top"><div><div class="rcard-cat">🏚️ Unsafe Building</div><div class="rcard-title">Structurally compromised 3-storey — Lumley</div></div><span class="pill pill-high">High</span></div>
+              <div class="rcard-meta"><span>📍 Lumley</span><span>🕐 4h ago</span><span>👁 18</span></div>
+            </div>
+          </div>
+          <div class="rcard">
+            <div class="rcard-accent" style="background:var(--green);"></div>
+            <div class="rcard-body">
+              <div class="rcard-top"><div><div class="rcard-cat">🌊 Flooding</div><div class="rcard-title">Blocked drainage — Wellington St. cleared</div></div><span class="pill pill-res">Resolved ✓</span></div>
+              <div class="rcard-meta"><span>📍 Wellington</span><span>🕐 1d ago</span><span>👁 41</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ALERTS SCREEN ═══ -->
+    <div class="screen" id="screen-alerts">
+      <div class="alerts-wrap">
+        <div class="sec-row" style="padding:4px 0 14px;"><div class="sec-h">Emergency Alerts</div><div style="font-size:11px;color:var(--muted);">Broadcast by Government</div></div>
+
+        <div class="alert-card emergency">
+          <div class="alert-type">⚠️ Emergency Alert</div>
+          <div class="alert-title">Flood Warning — Eastern Freetown</div>
+          <div class="alert-body">Heavy rainfall forecast for 48hrs. Residents in low-lying areas of Kissy and Calaba Town are advised to move to higher ground immediately. Emergency shelters open at King Tom Community Centre and St. Edward's Secondary School.</div>
+          <div class="alert-meta">🏛️ National Disaster Management Agency · Issued 09:15 today</div>
+          <button class="alert-action">📍 Find nearest shelter</button>
+        </div>
+
+        <div class="alert-card warning">
+          <div class="alert-type">🔶 Road Closure</div>
+          <div class="alert-title">Kissy Road Closed — Bridge Collapse</div>
+          <div class="alert-body">Kissy Road between junction 7 and ferry terminal is closed until further notice due to bridge structural failure. Use Wilberforce or Lumley Road as alternative routes.</div>
+          <div class="alert-meta">🏛️ Ministry of Works · Issued 07:42 today</div>
+          <button class="alert-action">🗺️ View alternative route</button>
+        </div>
+
+        <div class="alert-card info">
+          <div class="alert-type">ℹ️ Public Health Notice</div>
+          <div class="alert-title">Cholera Prevention — Murray Town</div>
+          <div class="alert-body">Following reports of contaminated water, boil all drinking water in Murray Town and surrounding areas. Free water purification tablets available at the community health post on Mountain Cut Road.</div>
+          <div class="alert-meta">🏛️ Ministry of Health &amp; Sanitation · Issued yesterday</div>
+          <button class="alert-action">📋 Read full advisory</button>
+        </div>
+
+        <div class="alert-card resolved">
+          <div class="alert-type">✅ Alert Lifted</div>
+          <div class="alert-title">Wellington Drainage — Issue Resolved</div>
+          <div class="alert-body">The drainage blockage on Wellington Street has been fully cleared by Freetown City Council teams. Flooding risk in the area has returned to normal. Thank you to the 12 citizens who reported this issue.</div>
+          <div class="alert-meta">🏛️ Freetown City Council · Resolved 38hrs after first report</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GOV DASHBOARD SCREEN ═══ -->
+    <div class="screen" id="screen-gov">
+      <div class="gov-wrap">
+        <div class="gov-hero">
+          <div class="gov-hero-h">🏛️ Ministry of Works — Command Centre</div>
+          <div class="gov-stats">
+            <div class="gs crit-stat"><div class="gs-num">7</div><div class="gs-lbl">Critical Incidents</div></div>
+            <div class="gs alert-stat"><div class="gs-num">34</div><div class="gs-lbl">Open Cases</div></div>
+            <div class="gs"><div class="gs-num" style="color:#6EE7B7;">89%</div><div class="gs-lbl">Resolve Rate</div></div>
+            <div class="gs"><div class="gs-num" style="color:#93C5FD;">26h</div><div class="gs-lbl">Avg. Response</div></div>
+          </div>
+        </div>
+
+        <!-- AI Panel -->
+        <div class="ai-panel">
+          <div class="ai-panel-h">🤖 AI Intelligence Module</div>
+          <div class="ai-insight"><div class="ai-icon">🌊</div><div><b>Flood prediction:</b> 78% probability of severe flooding in East Freetown in next 72hrs based on drainage reports + rainfall data. <b>Action: Pre-deploy drainage teams.</b></div></div>
+          <div class="ai-insight"><div class="ai-icon">🛣️</div><div><b>Duplicate detected:</b> 6 road reports in Kissy cluster confirmed as same incident. Consolidated to #SC-2025-0482.</div></div>
+          <div class="ai-insight"><div class="ai-icon">📊</div><div><b>Resource insight:</b> Electricity repair crew capacity at 40%. <b>Priority queue: 3 life-safety incidents pending.</b></div></div>
+        </div>
+
+        <!-- Incident Queue -->
+        <div class="sec-row" style="padding:0 0 10px;"><div class="sec-h">Priority Incident Queue</div><div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted);">Score = Severity × Urgency × Impact</div></div>
+
+        <div class="incident-queue">
+          <div class="iq-card p-crit">
+            <div class="iq-score"><div class="iq-score-num" style="color:var(--red);">97</div><div class="iq-score-lbl">SCORE</div></div>
+            <div style="flex:1;">
+              <div class="iq-title">🛣️ Collapsed bridge — Kissy Road</div>
+              <div class="iq-meta">📍 East Freetown · Life risk · 23 confirmations · 2h ago</div>
+              <div class="iq-assign mt8"><button class="assign-btn">Assign Team →</button> <span style="font-size:11px;color:var(--muted);margin-left:6px;">Eng. Koroma available</span></div>
+            </div>
+            <span class="pill pill-crit">Critical</span>
+          </div>
+          <div class="iq-card p-crit">
+            <div class="iq-score"><div class="iq-score-num" style="color:var(--red);">91</div><div class="iq-score-lbl">SCORE</div></div>
+            <div style="flex:1;">
+              <div class="iq-title">🔥 Fire risk — Congo Cross Market</div>
+              <div class="iq-meta">📍 Congo Cross · Evacuation risk · 67 views · 45m ago</div>
+              <div class="iq-assign mt8"><button class="assign-btn" style="background:var(--red);">Dispatch SLFF →</button></div>
+            </div>
+            <span class="pill pill-crit">Critical</span>
+          </div>
+          <div class="iq-card p-high">
+            <div class="iq-score"><div class="iq-score-num" style="color:var(--orange);">74</div><div class="iq-score-lbl">SCORE</div></div>
+            <div style="flex:1;">
+              <div class="iq-title">⚡ Live pole down — Murray Town</div>
+              <div class="iq-meta">📍 Murray Town · Electrocution risk · 5h ago</div>
+              <div class="iq-assign mt8"><button class="assign-btn" style="background:var(--orange);">Assign EDSA →</button></div>
+            </div>
+            <span class="pill pill-high">High</span>
+          </div>
+          <div class="iq-card p-med">
+            <div class="iq-score"><div class="iq-score-num" style="color:var(--gold);">52</div><div class="iq-score-lbl">SCORE</div></div>
+            <div style="flex:1;">
+              <div class="iq-title">🌳 Illegal logging — Waterloo Forest</div>
+              <div class="iq-meta">📍 Waterloo · Environmental crime · 6d ago</div>
+              <div class="iq-assign mt8"><button class="assign-btn" style="background:var(--gold);">Assign EPA →</button></div>
+            </div>
+            <span class="pill pill-med">Medium</span>
+          </div>
+        </div>
+
+        <!-- Agency Scorecard -->
+        <div class="scorecard">
+          <div class="sc-header"><div class="sc-h">Agency Performance Scorecard</div><div class="sc-period">This month</div></div>
+          <div class="sc-row"><div class="sc-rank">1</div><div class="sc-agency">FCC — Drainage Unit</div><div class="sc-bar-wrap"><div class="sc-bar" style="width:94%;"></div></div><div class="sc-pct">94%</div></div>
+          <div class="sc-row"><div class="sc-rank">2</div><div class="sc-agency">Ministry of Works — Roads</div><div class="sc-bar-wrap"><div class="sc-bar" style="width:87%;"></div></div><div class="sc-pct">87%</div></div>
+          <div class="sc-row"><div class="sc-rank">3</div><div class="sc-agency">EPA Sierra Leone</div><div class="sc-bar-wrap"><div class="sc-bar" style="width:79%;"></div></div><div class="sc-pct">79%</div></div>
+          <div class="sc-row"><div class="sc-rank">4</div><div class="sc-agency">EDSA — Electricity</div><div class="sc-bar-wrap"><div class="sc-bar warn" style="width:61%;"></div></div><div class="sc-pct warn">61%</div></div>
+          <div class="sc-row"><div class="sc-rank">5</div><div class="sc-agency">Ministry of Health</div><div class="sc-bar-wrap"><div class="sc-bar poor" style="width:43%;"></div></div><div class="sc-pct poor">43%</div></div>
+        </div>
+
+        <!-- Escalation Path -->
+        <div style="background:var(--card);border-radius:var(--r2);padding:14px;box-shadow:var(--sh);margin-bottom:14px;">
+          <div class="sec-h" style="margin-bottom:10px;">⬆️ Escalation Framework</div>
+          <div style="display:flex;align-items:center;gap:0;font-size:12px;">
+            <div style="text-align:center;flex:1;"><div style="background:var(--green-tint);color:var(--green);border-radius:8px;padding:6px 4px;font-weight:700;font-size:11px;">Local Officer</div><div style="font-size:9px;color:var(--muted);margin-top:3px;">48h SLA</div></div>
+            <div style="color:var(--muted);padding:0 4px;">→</div>
+            <div style="text-align:center;flex:1;"><div style="background:var(--gold-tint);color:var(--gold);border-radius:8px;padding:6px 4px;font-weight:700;font-size:11px;">District Office</div><div style="font-size:9px;color:var(--muted);margin-top:3px;">72h SLA</div></div>
+            <div style="color:var(--muted);padding:0 4px;">→</div>
+            <div style="text-align:center;flex:1;"><div style="background:var(--orange-tint);color:var(--orange);border-radius:8px;padding:6px 4px;font-weight:700;font-size:11px;">Ministry</div><div style="font-size:9px;color:var(--muted);margin-top:3px;">7d SLA</div></div>
+            <div style="color:var(--muted);padding:0 4px;">→</div>
+            <div style="text-align:center;flex:1;"><div style="background:var(--red-tint);color:var(--red);border-radius:8px;padding:6px 4px;font-weight:700;font-size:11px;">State House</div><div style="font-size:9px;color:var(--muted);margin-top:3px;">National</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ PROFILE SCREEN ═══ -->
+    <div class="screen" id="screen-profile">
+      <div class="profile-wrap">
+        <div class="profile-hero-card">
+          <div class="ph-av">AK</div>
+          <div class="ph-name">Aminata Koroma</div>
+          <div class="ph-loc">📍 East Freetown, Western Area</div>
+          <div class="ph-chips">
+            <span class="ph-chip">🏅 Active Citizen</span>
+            <span class="ph-chip">🔒 Verified</span>
+            <span class="ph-chip">🇸🇱 Sierra Leone</span>
+          </div>
+        </div>
+
+        <div class="impact-grid">
+          <div class="impact-cell"><div class="ic-num">12</div><div class="ic-lbl">Reports Filed</div></div>
+          <div class="impact-cell"><div class="ic-num">8</div><div class="ic-lbl">Resolved</div></div>
+          <div class="impact-cell"><div class="ic-num">34</div><div class="ic-lbl">People Helped</div></div>
+        </div>
+
+        <div class="menu-list">
+          <div class="menu-item" onclick="switchScreen('tracker')"><div class="mi-icon">📋</div>My Reports (12)<div class="mi-arr">›</div></div>
+          <div class="menu-item"><div class="mi-icon">🔔</div>Notifications<div class="mi-arr">›</div></div>
+          <div class="menu-item"><div class="mi-icon">🌍</div>Language <div class="lang-badge">English / Krio</div></div>
+          <div class="menu-item"><div class="mi-icon">🔒</div>Anonymous Reporting<div class="mi-arr">›</div></div>
+          <div class="menu-item"><div class="mi-icon">📞</div>Emergency Contacts<div class="mi-arr">›</div></div>
+          <div class="menu-item"><div class="mi-icon">📡</div>SMS / USSD Mode<div class="mi-arr">›</div></div>
+          <div class="menu-item"><div class="mi-icon">📊</div>Public Dashboard<div class="mi-arr">›</div></div>
+          <div class="menu-item"><div class="mi-icon">ℹ️</div>About CivicLink<div class="mi-arr">›</div></div>
+        </div>
+
+        <div style="background:var(--green-tint);border:1.5px solid #A7F3C6;border-radius:var(--r2);padding:16px;text-align:center;margin-top:14px;">
+          <div style="font-size:24px;margin-bottom:6px;">🏅</div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--green);">Active Citizen Award</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">8 community issues resolved through your reports.<br>Sierra Leone thanks you.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV (Citizen) -->
+  <nav class="bottom-nav" id="citizen-nav">
+    <button class="bnav active" id="nav-home" onclick="switchScreen('home')">
+      <div class="bnav-icon">🏠</div><div class="bnav-lbl">Home</div>
+    </button>
+    <button class="bnav" id="nav-feed" onclick="switchScreen('feed')">
+      <div class="bnav-icon">🗺️</div><div class="bnav-lbl">Live Map</div>
+    </button>
+    <button class="bnav bnav-report" id="nav-report" onclick="switchScreen('report')">
+      <div class="bnav-icon">➕</div><div class="bnav-lbl">Report</div>
+    </button>
+    <button class="bnav" id="nav-tracker" onclick="switchScreen('tracker')">
+      <div class="bnav-icon">📊</div><div class="bnav-lbl">My Reports</div>
+    </button>
+    <button class="bnav" id="nav-profile" onclick="switchScreen('profile')">
+      <div class="bnav-icon">👤</div><div class="bnav-lbl">Profile</div>
+    </button>
+  </nav>
+
+  <!-- BOTTOM NAV (Gov) -->
+  <nav class="bottom-nav" id="gov-nav" style="display:none;">
+    <button class="bnav active" id="gnav-gov" onclick="switchScreen('gov')">
+      <div class="bnav-icon">🏛️</div><div class="bnav-lbl">Command</div>
+    </button>
+    <button class="bnav" id="gnav-feed" onclick="switchScreen('feed')">
+      <div class="bnav-icon">🗺️</div><div class="bnav-lbl">Live Map</div>
+    </button>
+    <button class="bnav" id="gnav-alerts" onclick="switchScreen('alerts')">
+      <div class="bnav-icon">📢</div><div class="bnav-lbl">Broadcast</div>
+    </button>
+    <button class="bnav" id="gnav-tracker" onclick="switchScreen('tracker')">
+      <div class="bnav-icon">📋</div><div class="bnav-lbl">Cases</div>
+    </button>
+    <button class="bnav" id="gnav-profile" onclick="switchScreen('profile')">
+      <div class="bnav-icon">⚙️</div><div class="bnav-lbl">Settings</div>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const ROUTING = {
+  road:        ['Ministry of Works, Housing & Infrastructure','Freetown City Council — Roads Unit','District Officer, Western Area'],
+  electricity: ['Ministry of Energy & Power','EDSA — Electricity Distribution & Supply','District Engineer, Western Area'],
+  flood:       ['Ministry of Water Resources','FCC — Drainage Unit','National Disaster Management Agency'],
+  building:    ['Ministry of Lands, Housing & Country Planning','Urban Planning Authority','Building Inspectorate Unit'],
+  fire:        ['Sierra Leone Fire Force','National Disaster Management Agency','Ministry of Internal Affairs'],
+  environment: ['EPA Sierra Leone','Forestry Division','Ministry of Environment & Climate Change'],
+  health:      ['Ministry of Health & Sanitation','District Health Management Team','National Emergency Medical Services'],
+  security:    ['Sierra Leone Police Force','Ministry of Internal Affairs','District Security Coordinator'],
+  water:       ['Guma Valley Water Company','Ministry of Water Resources','District Water Officer'],
+  corruption:  ['Anti-Corruption Commission (ACC)','Ministry of Finance — Audit Unit','Inspector General Office'],
+};
+
+let currentMode = 'citizen';
+let activeScreen = 'home';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-citizen').classList.toggle('active', mode === 'citizen');
+  document.getElementById('mode-gov').classList.toggle('active', mode === 'gov');
+  document.getElementById('citizen-nav').style.display = mode === 'citizen' ? 'flex' : 'none';
+  document.getElementById('gov-nav').style.display = mode === 'gov' ? 'flex' : 'none';
+
+  if (mode === 'gov') {
+    document.getElementById('topbar').innerHTML = `
+      <div class="tb-left"><div class="tb-greeting">Ministry of Works · Western Area</div><div class="tb-title">Government Command Dashboard</div></div>
+      <div class="tb-right">
+        <button class="icon-btn" onclick="switchScreen('alerts')">📢<div class="badge-dot"></div></button>
+        <div class="avatar-sm" style="background:#93C5FD;color:var(--ink2);">GO</div>
+      </div>`;
+    switchScreen('gov');
+  } else {
+    document.getElementById('topbar').innerHTML = `
+      <div class="tb-left"><div class="tb-greeting">Good morning, Aminata</div><div class="tb-title">Western Area · Freetown</div></div>
+      <div class="tb-right">
+        <button class="icon-btn" onclick="switchScreen('alerts')">🔔<div class="badge-dot"></div></button>
+        <div class="avatar-sm" onclick="switchScreen('profile')">AK</div>
+      </div>`;
+    switchScreen('home');
+  }
+}
+
+function switchScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.bnav').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+
+  const navId = currentMode === 'gov' ? 'gnav-' : 'nav-';
+  const el = document.getElementById(navId + name);
+  if (el) el.classList.add('active');
+
+  document.querySelector('.content').scrollTop = 0;
+}
+
+function pickCat(btn, type) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const depts = ROUTING[type] || [];
+  document.getElementById('routeItems').innerHTML = depts.map(d =>
+    `<div class="route-item"><div class="ri-dot"></div>${d}</div>`).join('');
+}
+
+function pickSev(btn) {
+  document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function submitReport() {
+  showToast('✅ Report #SC-2025-0501 submitted — Government notified');
+  setTimeout(() => switchScreen('tracker'), 1400);
+}
+
+function rateStar(el) {
+  const stars = el.parentElement.children;
+  const idx = Array.from(stars).indexOf(el);
+  Array.from(stars).forEach((s, i) => s.textContent = i <= idx ? '⭐' : '☆');
+  showToast('⭐ Thanks for your feedback');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Feed tab interaction
+document.querySelectorAll('.ftab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.ftab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
